@@ -60,6 +60,9 @@
 
     $('.card-body').html(`<div id='question'><p>${question[qString]}</p></div>
       <div id='answer' class='d-none'><p>${question[aString]}</p></div>`)
+    
+    $('.answer-button').html('Show Answer')
+    
 
     return nextIndex;
   }
@@ -76,57 +79,12 @@
         var file = $("#file-input")[0].files[0];
         
         if (file) {
-          var textType = /text.*/;
+          
           var sheetType = /sheet/;
           
   
           var reader = new FileReader();
-          if (file.type.match(textType)) {
-
-            // event listeners for the reader
-            reader.addEventListener('loadstart', () => {
-              $('.card .card-body').html(`<div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading...</span>
-              </div>`)
-            })
-            reader.addEventListener('loadend', () => {
-              $('#file-input, #use-another, #buttons').toggleClass('d-none');
-              $('#use-another').on('click', () => {
-                $('#use-another, #file-input').toggleClass('d-none')
-              })
-              $('.card .card-body').html(`<button class='btn btn-primary btn-lg begin'>Begin</button>`);
-              $('.card-header').html(`Using file: ${file.name}`);
-              $('.begin').on('click',() => {
-                current_question = nextQuestion(questions);
-                displayQuestion(current_question);
-              });
-              
-              $('.next-button').on('click', () => {
-                do {
-                  next_question = nextQuestion(questions);
-                } while (next_question === current_question)
-                
-                displayQuestion(next_question);
-                current_question = next_question;
-              })
-              $('.answer-button').on('click', () => {
-                $('#answer').toggleClass('d-none')
-                if ($('#answer').hasClass('d-none')) {
-                  $('.answer-button').html('Show Answer')
-                } else {
-                  $('.answer-button').html('Hide Answer')
-                }
-              })
-            })
-            
-            reader.onload = function(e) {
-              questions = reader.result;
-              var regex = new RegExp('[\r]+')
-              questions = questions.split(regex)
-            }
-          
-            reader.readAsText(file)
-          } else if (file.type.match(sheetType)) {
+          if (file.type.match(sheetType)) {
       
             // event listeners for the reader
             reader.addEventListener('loadstart', () => {
@@ -166,7 +124,6 @@
             
             
             reader.onload = function(e) {
-              console.log('reading excel file')
               
               var data = new Uint8Array(e.target.result);
               var workbook = XLSX.read(data, {type: 'array'});
@@ -176,16 +133,12 @@
               var sheetName = workbook.SheetNames[0];
               var sheet = workbook.Sheets[sheetName];
 
-              console.log(sheet)
-
               //Read all rows from First Sheet into an JSON array.
               excelRows = XLSX.utils.sheet_to_row_object_array(sheet);
 
               // value of the header cells
               question = sheet['A1'].v;
               answer = sheet['B1'].v;
-              
-              console.log(question, answer)
             } 
 
             reader.readAsArrayBuffer(file);
